@@ -1,3 +1,5 @@
+// server/config/db.js
+// /Users/yrdnqldrwn/Desktop/SOFTWARE/VS_Code/proshop/server/config/db.js
 import mongoose from "mongoose";
 
 const connectDB = async () => {
