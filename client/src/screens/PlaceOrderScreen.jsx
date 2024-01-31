@@ -1,5 +1,4 @@
 // client/src/screens/PlaceOrderScreen.jsx
-import React, { useState } from "react";
 import { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
@@ -86,9 +85,7 @@ const PlaceOrderScreen = () => {
                           />
                         </Col>
                         <Col>
-                          <Link to={`/products/${item.product}`}>
-                            {item.name}
-                          </Link>
+                          <Link to={`/product/${item._id}`}>{item.name}</Link>
                         </Col>
                         <Col md={5}>
                           {item.qty} x ${item.price} = $
@@ -155,7 +152,9 @@ const PlaceOrderScreen = () => {
                     </Button>
                   </Col>
                   <Col md={5}>
-                    {error && <Message variant="danger">{error}</Message>}
+                    {error && (
+                      <Message variant="danger">{error.data.message}</Message>
+                    )}
                   </Col>
                   {isLoading && <Loader />}
                 </Row>

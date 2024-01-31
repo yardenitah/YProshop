@@ -22,7 +22,8 @@ const authSlice = createSlice({
       // logout for the local stuff
       //TODO here we need to also remove the cart from storage so the next logged in user doesn't inherit the previous users cart and shipping
       state.userInfo = null;
-      localStorage.removeItem("userInfo");
+      // localStorage.removeItem("userInfo");
+      localStorage.clear();
     },
   },
 });

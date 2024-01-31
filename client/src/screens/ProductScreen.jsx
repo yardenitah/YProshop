@@ -1,6 +1,8 @@
 // client/src/screens/ProductScreen.jsx
 import { useState } from "react";
-import React from "react"; // Corrected import statement
+import React from "react";
+import { FiEdit } from "react-icons/fi";
+import { FaRegTrashAlt } from "react-icons/fa";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import {
   Row,
@@ -22,6 +24,8 @@ import Meta from "../components/Meta";
 import {
   useGetProductDetailsQuery,
   useCreateReviewMutation,
+  useEditReviewMutation,
+  useDeleteReviewMutation,
 } from "../slices/productsApiSlice";
 import { addToCart } from "../slices/cartSlice";
 
@@ -35,6 +39,9 @@ const ProductScreen = () => {
   const [qty, setQty] = useState(1);
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
+  const [editingReview, setEditingReview] = useState(null);
+  const [editedRating, setEditedRating] = useState(0);
+  const [editedComment, setEditedComment] = useState("");
 
   const {
     data: product,
@@ -45,6 +52,8 @@ const ProductScreen = () => {
 
   const [createReview, { isLoading: loadingProductReview }] =
     useCreateReviewMutation();
+  const [editReview] = useEditReviewMutation();
+  const [deleteReview] = useDeleteReviewMutation();
 
   const { userInfo } = useSelector((state) => state.auth);
 
@@ -53,17 +62,60 @@ const ProductScreen = () => {
     navigate("/cart");
   };
 
+  const handleEditReview = (review) => {
+    setEditingReview(review);
+    setEditedRating(review.rating);
+    setEditedComment(review.comment);
+  };
+
+  const deleteReviewHandler = async (review) => {
+    if (window.confirm("Are you sure you want to delete your review?")) {
+      try {
+        const res = await deleteReview({
+          productId,
+          reviewId: review._id, // Pass the reviewId to the server
+        }).unwrap();
+
+        console.log(res);
+        toast.success("Review Deleted");
+      } catch (error) {
+        console.error(error);
+        toast.error(error?.data?.message || error.error);
+      }
+    } else {
+      console.log("Deletion canceled");
+    }
+  };
+
   const submitHandler = async (e) => {
     e.preventDefault();
     try {
-      await createReview({
-        productId,
-        rating,
-        comment,
-      }).unwrap();
+      if (editingReview) {
+        // Edit existing review
+        const res = await editReview({
+          productId,
+          rating: editedRating,
+          comment: editedComment,
+        }).unwrap();
+
+        console.log(res);
+        toast.success("Review edited successfully");
+      } else {
+        // Create new review
+        await createReview({
+          productId,
+          rating,
+          comment,
+        }).unwrap();
+        toast.success("Review submitted");
+      }
+
       refetch();
-      toast.success("Review submitted");
+      setEditingReview(null);
+      setEditedRating(0);
+      setEditedComment("");
       setComment("");
+      setRating(0);
     } catch (err) {
       toast.error(err?.data?.message || err.error);
     }
@@ -174,17 +226,40 @@ const ProductScreen = () => {
             <Col md={6}>
               <h2>Reviews</h2>
               {product.reviews.length === 0 && <Message>No Reviews</Message>}
+
               <ListGroup variant="flush">
                 {product.reviews.map((review) => (
                   <ListGroup.Item key={review._id}>
-                    <strong>{review.name}</strong>
-                    <Rating value={review.rating} />
-                    <p>{review.createdAt.substring(0, 10)}</p>{" "}
-                    {/* Corrected typo */}
-                    <p>{review.comment}</p>
+                    <Row>
+                      <Col md={7}>
+                        <strong>{review.name}</strong>
+                        <Rating value={review.rating} />
+                        <p>{review.createdAt.substring(0, 10)}</p>{" "}
+                        <p>{review.comment}</p>
+                      </Col>
+                      {userInfo && userInfo._id === review.user && (
+                        <>
+                          <Col md={1}>
+                            <Button
+                              className="btn btn-sm d-flex"
+                              onClick={() => handleEditReview(review)}
+                            >
+                              <FiEdit />
+                            </Button>
+                          </Col>
+                          <Col md={1}>
+                            <Button
+                              className="btn btn-sm d-flex"
+                              onClick={() => deleteReviewHandler(review)}
+                            >
+                              <FaRegTrashAlt />
+                            </Button>
+                          </Col>
+                        </>
+                      )}
+                    </Row>
                   </ListGroup.Item>
                 ))}
-
                 <ListGroup.Item>
                   <h2>Write a Review</h2>
 
@@ -197,8 +272,12 @@ const ProductScreen = () => {
                         <Form.Label>Rating</Form.Label>
                         <Form.Control
                           as="select"
-                          value={rating}
-                          onChange={(e) => setRating(Number(e.target.value))}
+                          value={editingReview ? editedRating : rating}
+                          onChange={(e) =>
+                            editingReview
+                              ? setEditedRating(Number(e.target.value))
+                              : setRating(Number(e.target.value))
+                          }
                         >
                           <option value="">Select...</option>
                           <option value="1">1 - Poor</option>
@@ -215,8 +294,12 @@ const ProductScreen = () => {
                         <Form.Control
                           as="textarea"
                           rows={3}
-                          value={comment}
-                          onChange={(e) => setComment(e.target.value)}
+                          value={editingReview ? editedComment : comment}
+                          onChange={(e) =>
+                            editingReview
+                              ? setEditedComment(e.target.value)
+                              : setComment(e.target.value)
+                          }
                         />
                       </FormGroup>
                       <Button
@@ -224,7 +307,7 @@ const ProductScreen = () => {
                         disabled={loadingProductReview}
                         variant="primary"
                       >
-                        Submit
+                        {editingReview ? "Edit Review" : "Submit"}
                       </Button>
                     </Form>
                   ) : (

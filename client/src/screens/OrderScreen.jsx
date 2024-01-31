@@ -68,27 +68,27 @@ const OrderScreen = () => {
   }
 
   //! TESTING ONLY! REMOVE BEFORE PRODUCTION
-  async function onApproveTest() {
-    await payOrder({ orderId, details: { payer: {} } });
-    refetch();
-    toast.success("Order is paid");
-    setShowConfetti(true); // Show confetti when the component mounts
-    const confettiTimer = setTimeout(() => {
-      setShowConfetti(false);
-    }, 4700); // Hide confetti after 4 seconds
-  }
+  // async function onApproveTest() {
+  //   await payOrder({ orderId, details: { payer: {} } });
+  //   refetch();
+  //   toast.success("Order is paid");
+  //   setShowConfetti(true); // Show confetti when the component mounts
+  //   const confettiTimer = setTimeout(() => {
+  //     setShowConfetti(false);
+  //   }, 4700); // Hide confetti after 4 seconds
+  // }
 
   function onApprove(data, actions) {
     // details come from Paypal
     return actions.order.capture().then(async function (details) {
       try {
-        await payOrder({ orderId, details });
+        await payOrder({ orderId, details }).unwrap();
         refetch();
         toast.success("Order is paid");
         setShowConfetti(true); // Show confetti when the component mounts
         const confettiTimer = setTimeout(() => {
           setShowConfetti(false);
-        }, 4800); // Hide confetti after 4 seconds
+        }, 5000); // Hide confetti after 4 seconds
       } catch (err) {
         toast.error(err?.data?.message || err.error);
       }
@@ -122,7 +122,7 @@ const OrderScreen = () => {
   return isLoading ? (
     <Loader />
   ) : error ? (
-    <Message variant="danger">{error.data.message}</Message>
+    <Message variant="danger">{error?.data?.message}</Message>
   ) : (
     <>
       {showConfetti && <Confetti />}
