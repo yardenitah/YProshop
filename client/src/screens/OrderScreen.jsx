@@ -88,7 +88,7 @@ const OrderScreen = () => {
         setShowConfetti(true); // Show confetti when the component mounts
         const confettiTimer = setTimeout(() => {
           setShowConfetti(false);
-        }, 5000); // Hide confetti after 4 seconds
+        }, 5600); // Hide confetti after 4 seconds
       } catch (err) {
         toast.error(err?.data?.message || err.error);
       }

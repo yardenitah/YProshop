@@ -91,7 +91,7 @@ function LoginScreen() {
           className="mt-2"
           disabled={isLoading}
         >
-          singIn
+          Sign in
         </Button>
 
         {isLoading && <Loader />}
