@@ -2,6 +2,8 @@
 import { useState } from "react";
 import React from "react";
 import { FiEdit } from "react-icons/fi";
+import { FaTimes } from "react-icons/fa";
+import { CiShare1 } from "react-icons/ci";
 import { FaRegTrashAlt } from "react-icons/fa";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import {
@@ -21,6 +23,7 @@ import Rating from "../components/Rating";
 import Loader from "../components/Loader";
 import Message from "../components/Message";
 import Meta from "../components/Meta";
+import Share from "../components/SharePopup";
 import {
   useGetProductDetailsQuery,
   useCreateReviewMutation,
@@ -42,6 +45,7 @@ const ProductScreen = () => {
   const [editingReview, setEditingReview] = useState(null);
   const [editedRating, setEditedRating] = useState(0);
   const [editedComment, setEditedComment] = useState("");
+  const [share, setShare] = useState(false);
 
   const {
     data: product,
@@ -85,6 +89,10 @@ const ProductScreen = () => {
     } else {
       console.log("Deletion canceled");
     }
+  };
+
+  const handleShare = () => {
+    setShare(!share);
   };
 
   const submitHandler = async (e) => {
@@ -154,6 +162,25 @@ const ProductScreen = () => {
                 <ListGroup.Item>Price: ${product.price}</ListGroup.Item>
                 <ListGroup.Item>
                   Description: {product.description}
+                </ListGroup.Item>
+                <ListGroup.Item>
+                  <Row>
+                    <Col md={5}>
+                      <Button
+                        className="btn btn-sm my-3"
+                        style={{ cursor: "pointer" }}
+                        onClick={() => setShare(true)}
+                      >
+                        Share <CiShare1 />
+                      </Button>
+                    </Col>
+
+                    <Col className="my-3 mx-4">
+                      {share && <FaTimes onClick={() => setShare(false)} />}
+                    </Col>
+
+                    {share && <Share product />}
+                  </Row>
                 </ListGroup.Item>
               </ListGroup>
             </Col>
