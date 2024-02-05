@@ -91,10 +91,6 @@ const ProductScreen = () => {
     }
   };
 
-  const handleShare = () => {
-    setShare(!share);
-  };
-
   const submitHandler = async (e) => {
     e.preventDefault();
     try {
@@ -165,7 +161,7 @@ const ProductScreen = () => {
                 </ListGroup.Item>
                 <ListGroup.Item>
                   <Row>
-                    <Col md={5}>
+                    <Col md={5} sm={5}>
                       <Button
                         className="btn btn-sm my-3"
                         style={{ cursor: "pointer" }}
